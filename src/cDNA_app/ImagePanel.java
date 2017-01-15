@@ -45,10 +45,5 @@ public class ImagePanel extends JPanel {
         panel = new ScrollingImagePanel(op, 1200, 600);
         add(panel);
     }
-    
-    protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		g.drawImage(op, 120, 120, null);
-		//Graphics2D g2d = (Graphics2D) g;
-	}
+
 }
