@@ -12,32 +12,28 @@ import javax.swing.KeyStroke;
 /*
  * Pasek menu
  * */
-public class PasekMenu extends JMenuBar implements ActionListener
+public class PasekMenu extends JMenuBar
 {
-	public static JMenu AppMenu;
-	public static JMenuItem Zamknij;
-	
-	private JFrame App = null;
-	
-	public PasekMenu(JFrame app)
-	{
-		App = app;
+	public JMenu MenuSegment1;
+	public JMenuItem CloseButton;
+	public JMenuItem Option1;
 		
-		AppMenu = new JMenu("Aplikacja");
-		add(AppMenu);
+	public PasekMenu()
+	
+	{		
+		// Lista menu "Aplikacja"
+		MenuSegment1 = new JMenu("Aplikacja");
+		this.add(MenuSegment1);
 		
-		Zamknij = new JMenuItem("Zamknij");
+		// Przycisk "Zamknij"
+		CloseButton = new JMenuItem("Zamknij");
 		KeyStroke altF4 = KeyStroke.getKeyStroke("alt F4");
-		Zamknij.setAccelerator(altF4);
-		AppMenu.add(Zamknij);
-		
-		Zamknij.addActionListener(this);
-	}
+		CloseButton.setAccelerator(altF4);
+		MenuSegment1.add(CloseButton);
 
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		if(e.getSource() == this.Zamknij) {
-			App.dispose();
-		}
+		// Przycisk "Opcja 1"
+		Option1 = new JMenuItem("Opcja 1");
+		MenuSegment1.add(Option1);
+		
 	}
 }
