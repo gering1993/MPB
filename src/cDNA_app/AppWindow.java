@@ -50,7 +50,7 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	
 	//podobraz
 	private BufferedImage img;
-	private BufferedImage[][] arrayOfImages = new BufferedImage[numbCol][numbRow];
+	private BufferedImage[][] arrayOfImages;
 		
 	/**
 	 * Konstruktor
@@ -261,7 +261,9 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		this.speed=speed;
 	}
 	
-	private void divideImage(BufferedImage image, BufferedImage[][] array, int numbeorOfColumns, int numberOfRows){
+	//dzieli wybrany fragment obrazu na małe obrazy - zapisuje je w tablicy 'array'
+	private BufferedImage[][] divideImage(BufferedImage image, int numbeorOfColumns, int numberOfRows){
+		BufferedImage[][] array = new BufferedImage[numbeorOfColumns][numberOfRows];
 		int deltaX = image.getWidth() / numbeorOfColumns;
 		int deltaY = image.getHeight() / numberOfRows;
 		
@@ -270,8 +272,36 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 				array[column][row] = image.getSubimage(column * deltaX, row * deltaY, deltaX, deltaY);
 			}
 		}
-		
 		//System.out.println(new Color(array[1][4].getRGB(10, 10)).getGreen());
+		return array;
+	}
+	
+	//liczy wartość średnią pikseli dla każdego obrazu
+	private double computeAvgValueOfPixels(BufferedImage image){
+		int sum = 0, tempValue = 0;
+		double avg = 0.0;
+		
+		for(int row = 0; row < image.getHeight(); row++){
+			for(int column = 0; column < image.getWidth(); column++){
+				tempValue = new Color(image.getRGB(column, row)).getGreen();
+				if(tempValue > 30){
+					sum += tempValue;
+				}
+			}
+		}
+		
+		avg = (double)sum / (image.getWidth() * image.getHeight());
+		
+		return avg;
+	}
+	
+	private void printAvgValues(BufferedImage[][] array, int numberOfColumns, int numberOfRows){
+		for(int row = 0; row < numberOfRows; row++){
+			for(int column = 0; column < numberOfColumns; column++){
+				System.out.print((float)computeAvgValueOfPixels(array[column][row]) + "\t");
+			}
+			System.out.println();
+		}
 	}
 
 	/**
@@ -304,7 +334,8 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 						tiffPanel.getSizerWidth(),
 						tiffPanel.getSizerHeight());
 			
-			divideImage(img, arrayOfImages, numbCol, numbRow);
+			arrayOfImages = divideImage(img, numbCol, numbRow);
+			printAvgValues(arrayOfImages, numbCol, numbRow);
 			tiffPanel.drawSubimage(img);
 			this.requestFocus();
 		}
