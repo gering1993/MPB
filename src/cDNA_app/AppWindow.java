@@ -278,7 +278,7 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	
 	//liczy wartość średnią pikseli dla każdego obrazu
 	private double computeAvgValueOfPixels(BufferedImage image){
-		int sum = 0, tempValue = 0;
+		int sum = 0, tempValue = 0, pixelCounter = 0;
 		double avg = 0.0;
 		
 		for(int row = 0; row < image.getHeight(); row++){
@@ -286,11 +286,12 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 				tempValue = new Color(image.getRGB(column, row)).getGreen();
 				if(tempValue > 30){
 					sum += tempValue;
+					pixelCounter++;
 				}
 			}
 		}
 		
-		avg = (double)sum / (image.getWidth() * image.getHeight());
+		avg = ((double)sum) / ((double)pixelCounter);
 		
 		return avg;
 	}
@@ -298,7 +299,7 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	private void printAvgValues(BufferedImage[][] array, int numberOfColumns, int numberOfRows){
 		for(int row = 0; row < numberOfRows; row++){
 			for(int column = 0; column < numberOfColumns; column++){
-				System.out.print((float)computeAvgValueOfPixels(array[column][row]) + "\t");
+				System.out.print((int)computeAvgValueOfPixels(array[column][row]) + "\t");
 			}
 			System.out.println();
 		}
