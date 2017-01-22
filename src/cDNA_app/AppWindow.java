@@ -22,14 +22,18 @@ import jdk.internal.org.objectweb.asm.tree.IntInsnNode;
 
 public class AppWindow extends JFrame implements KeyListener, ActionListener 
 {
+	final int numbCol = 18;
+	final int numbRow = 20;
+	
+	
 	// Okno programu
 	private PasekMenu Menu;
 	private JPanel mainPanel, controlPanel;
 	private GroupLayout pozycjaLayout;
-	private JButton b_PlusV, b_MinusV, b_PlusH, b_MinusH, b_Image, b_Sizer ,b_x10, b_x1;
-	private JTextField f_horizontalValue, f_verticalValue;
-	private JLabel l_X, l_Y;
-	private int VerticalOffset, HorizontalOffset;
+	private JButton b_PlusV, b_MinusV, b_PlusH, b_MinusH, b_Image, b_Sizer ,b_x10, b_x1, b_OK, b_Reset;
+	private JTextField f_tiffXPosition, f_tiffYPosition, f_sizerXPosition, f_sizerYPosition;
+	private JLabel l_tiffX, l_tiffY, l_sizerX, l_sizerY;
+	private int tiffXOffset, tiffYOffset, sizerXOffset, sizerYOffset;
 	private ImagePanel tiffPanel;
 	
 	//private JLayeredPane T_imageAndGrid;
@@ -37,12 +41,16 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	private Grid T_grid;
 	//private JPanel tiffPanel;
 	
-	// Zmienne u¿ywane w programie - zast¹piæ inputem od u¿ytkownika
+	// Zmienne uï¿½ywane w programie - zastï¿½piï¿½ inputem od uï¿½ytkownika
 	private String filename = "input/img2.tif";
 	
 	// Ustawienia suwaka
 	private int mode; // 0 - przesuwanie TIFFa, 1 - przesuwanie ramki
 	private int speed;
+	
+	//podobraz
+	private BufferedImage img;
+	private BufferedImage[][] arrayOfImages;
 		
 	/**
 	 * Konstruktor
@@ -66,148 +74,183 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	 * @throws IOException
 	 */
 	private void showGUI() throws IOException {
-		this.setFocusable(true);							// sprawia ¿e dzia³a nas³uchiwanie klawiszy
-		this.setVisible(true);								// w³¹cza wyœwietlanie okna
+		this.setFocusable(true);							// sprawia ï¿½e dziaï¿½a nasï¿½uchiwanie klawiszy
+		this.setVisible(true);								// wï¿½ï¿½cza wyï¿½wietlanie okna
 		this.setSize(1220, 750); 							//usatwia rozmiar na "sztywno"
-		//this.setExtendedState(JFrame.MAXIMIZED_BOTH); 		//maksymalizuje domyœlnie g³ówne okno
-		this.setTitle("Program do ekstrakcji wartoœci liczbowych z obrazów mikromacierzy cDNA");
-		//this.pack(); 										// powinien sprawiaæ ¿e ka¿da czêœæ ma swoj¹ preferowan¹ wartoœæ, lub wieksz¹.
-															// Alternatywnie mo¿na rozmiar JFrame ustawiæ na sztywno
-		this.setResizable(true);							// ¯eby nie mo¿na by³o zmieniaæ rozmiaru okna
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);		// ¯eby X zamyka³ program a nie tylko okno
+		//this.setExtendedState(JFrame.MAXIMIZED_BOTH); 		//maksymalizuje domyï¿½lnie gï¿½ï¿½wne okno
+		this.setTitle("Program do ekstrakcji wartoï¿½ci liczbowych z obrazï¿½w mikromacierzy cDNA");
+		//this.pack(); 										// powinien sprawiaï¿½ ï¿½e kaï¿½da czï¿½ï¿½ ma swojï¿½ preferowanï¿½ wartoï¿½ï¿½, lub wiekszï¿½.
+															// Alternatywnie moï¿½na rozmiar JFrame ustawiï¿½ na sztywno
+		this.setResizable(true);							// ï¿½eby nie moï¿½na byï¿½o zmieniaï¿½ rozmiaru okna
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);		// ï¿½eby X zamykaï¿½ program a nie tylko okno
 		
-		mainPanel = new JPanel();							// Dodaje panel g³ówny
-		this.add(mainPanel);								// Dodaje pane³ g³ówny do JFrame
+		mainPanel = new JPanel();							// Dodaje panel gï¿½ï¿½wny
+		this.add(mainPanel);								// Dodaje paneï¿½ gï¿½ï¿½wny do JFrame
 				
 		// Pasek menu
 		this.Menu = new PasekMenu();						// Stworzenie paska menu
 		this.setJMenuBar(Menu);								// Dodanie paska do naszego okna
-		this.Menu.CloseButton.addActionListener(this);		// Dodanie s³uchacza dla przycisku 
+		this.Menu.CloseButton.addActionListener(this);		// Dodanie sï¿½uchacza dla przycisku 
 		
 		// Panel z kontrolkami siatki
 		controlPanel = new JPanel();
 		controlPanel.setBorder(BorderFactory.createTitledBorder("Pozycja siatki"));
 		
-		// Panel z obrazem i siatk¹
+		// Panel z obrazem i siatkï¿½
 		tiffPanel = new ImagePanel(filename);
 		tiffPanel.setOpaque(false);
 		tiffPanel.setBounds(10,15,1200,605);
 
 		
-		// Panel opakowuj¹cy TIFF i siatkê
+		// Panel opakowujï¿½cy TIFF i siatkï¿½
 		T_imageAndGrid = new JPanel();
 		T_imageAndGrid.setBorder(BorderFactory.createTitledBorder("cDNA TIFF"));
 		
 
-		// Pocz¹tkowa pozycja siatki
-		VerticalOffset = 0;
-		HorizontalOffset = 0;
+		// Poczï¿½tkowa pozycja siatki
+		tiffXOffset = 0;
+		tiffYOffset = 0;
 		
 		// Przyciski panelu sterowania
-		b_PlusV = new JButton("+");
-		b_MinusV = new JButton("-");
-		b_PlusH = new JButton("+");
-		b_MinusH = new JButton("-");
+		//b_PlusV = new JButton("+");
+		//b_MinusV = new JButton("-");
+		//b_PlusH = new JButton("+");
+		//b_MinusH = new JButton("-");
 		b_Image = new JButton("Obraz");
 		b_Sizer = new JButton("Ramka");
 		b_x1 = new JButton("x1");
 		b_x10 = new JButton("x10");
+		b_OK = new JButton("OK");
+		b_Reset = new JButton("RESET");
 		
 		
-		// Pola na wartoœci przesuniêcia siatki
-		f_horizontalValue = new JTextField(Integer.toString(VerticalOffset));
-		f_verticalValue = new JTextField(Integer.toString(HorizontalOffset));
+		// Pola na wartoï¿½ci przesuniï¿½cia siatki
+		f_tiffXPosition = new JTextField(Integer.toString(tiffXOffset));
+		f_tiffYPosition = new JTextField(Integer.toString(tiffYOffset));
+		f_sizerXPosition = new JTextField(Integer.toString(tiffXOffset));
+		f_sizerYPosition = new JTextField(Integer.toString(tiffYOffset));
 		
 		// Label 'X' i 'Y'
-		l_X = new JLabel("X: ");
-		l_Y = new JLabel("Y: ");
+		l_tiffX = new JLabel("Obraz   X: ");
+		l_tiffY = new JLabel("Y: ");
+		l_sizerX = new JLabel("Ramka   X: ");
+		l_sizerY = new JLabel("Y: ");
 		
-		// Dodanie przycisków do panelu sterowania
-		controlPanel.add(l_X);
-		controlPanel.add(b_PlusH);
-		controlPanel.add(b_MinusH);
-		controlPanel.add(f_verticalValue);
-		controlPanel.add(l_Y);
-		controlPanel.add(b_PlusV);
-		controlPanel.add(b_MinusV);
-		controlPanel.add(f_horizontalValue);
+		// Dodanie przyciskï¿½w do panelu sterowania
+		controlPanel.add(l_tiffX);
+		//controlPanel.add(b_PlusH);
+		//controlPanel.add(b_MinusH);
+		controlPanel.add(f_tiffYPosition);
+		controlPanel.add(l_tiffY);
+		//controlPanel.add(b_PlusV);
+		//controlPanel.add(b_MinusV);
+		controlPanel.add(f_tiffXPosition);
+		controlPanel.add(l_sizerX);
+		//controlPanel.add(b_PlusH);
+		//controlPanel.add(b_MinusH);
+		controlPanel.add(f_sizerXPosition);
+		controlPanel.add(l_sizerY);
+		//controlPanel.add(b_PlusV);
+		//controlPanel.add(b_MinusV);
+		controlPanel.add(f_sizerYPosition);
 		controlPanel.add(b_Image);
 		controlPanel.add(b_Sizer);
 		controlPanel.add(b_x1);
 		controlPanel.add(b_x10);
+		controlPanel.add(b_OK);
+		controlPanel.add(b_Reset);
 		
-		// Dodanie s³uchacza do przycisków panelu kontrolnego
-		b_PlusH.addActionListener(this);
-		b_MinusH.addActionListener(this);
-		b_PlusV.addActionListener(this);
-		b_MinusV.addActionListener(this);
+		// Dodanie sï¿½uchacza do przyciskï¿½w panelu kontrolnego
+		//b_PlusH.addActionListener(this);
+		//b_MinusH.addActionListener(this);
+		//b_PlusV.addActionListener(this);
+		//b_MinusV.addActionListener(this);
 		b_Image.addActionListener(this);
 		b_Sizer.addActionListener(this);
 		b_x1.addActionListener(this);
 		b_x10.addActionListener(this);
+		b_OK.addActionListener(this);
+		b_Reset.addActionListener(this);
 		
-		// Dodanie s³uchacza pól na wartoœci przesuniêcia siatki
-		f_verticalValue.addActionListener(this);
-		f_horizontalValue.addActionListener(this);
+		// Dodanie sï¿½uchacza pï¿½l na wartoï¿½ci przesuniï¿½cia siatki
+		//f_tiffYPosition.addActionListener(this);
+		//f_tiffXPosition.addActionListener(this);
 		
 		// Layout panelu sterowania
 		pozycjaLayout = new GroupLayout(controlPanel);
 		pozycjaLayout.setAutoCreateGaps(true);
 		pozycjaLayout.setAutoCreateContainerGaps(true);
 
-		// Rozk³ad horyzontalny elementow panelu kontrolnego
+		// Rozkï¿½ad horyzontalny elementow panelu kontrolnego
 		pozycjaLayout.setHorizontalGroup(pozycjaLayout.createSequentialGroup()
-				.addComponent(l_X)
-        		.addComponent(b_PlusH)
-        		.addComponent(b_MinusH)
-        		.addComponent(f_verticalValue)
-        		.addGap(30)
-        		.addComponent(l_Y)
-        		.addComponent(b_PlusV)
-        		.addComponent(b_MinusV)
-        		.addComponent(f_horizontalValue)
-        		.addGap(30)
+				.addComponent(l_tiffX)
+        		//.addComponent(b_PlusH)
+        		//.addComponent(b_MinusH)
+        		.addComponent(f_tiffXPosition)
+        		.addGap(20)
+        		.addComponent(l_tiffY)
+        		//.addComponent(b_PlusV)
+        		//.addComponent(b_MinusV)
+        		.addComponent(f_tiffYPosition)
+        		.addGap(40)
+        		.addComponent(l_sizerX)
+        		.addComponent(f_sizerXPosition)
+        		.addGap(20)
+        		.addComponent(l_sizerY)
+        		.addComponent(f_sizerYPosition)
+        		.addGap(40)
         		.addComponent(b_Image)
         		.addComponent(b_Sizer)
         		.addComponent(b_x1)
         		.addComponent(b_x10)
+        		.addGap(50)
+        		.addComponent(b_OK)
+        		.addGap(10)
+        		.addComponent(b_Reset)
         		
 		);
 		
-		// Rozk³ad wertykalny elementow panelu kontrolnego
+		// Rozkï¿½ad wertykalny elementow panelu kontrolnego
 		pozycjaLayout.setVerticalGroup(pozycjaLayout.createSequentialGroup()
 				.addGroup(pozycjaLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addComponent(l_X)
-		        		.addComponent(b_PlusH)
-		        		.addComponent(b_MinusH)
-		        		.addComponent(f_verticalValue)
+						.addComponent(l_tiffX)
+		        		//.addComponent(b_PlusH)
+		        		//.addComponent(b_MinusH)
+		        		.addComponent(f_tiffXPosition)
 		        		//.addGap(75)
-		        		.addComponent(l_Y)
-		        		.addComponent(b_PlusV)
-		        		.addComponent(b_MinusV)
-		        		.addComponent(f_horizontalValue)
+		        		.addComponent(l_tiffY)
+		        		//.addComponent(b_PlusV)
+		        		//.addComponent(b_MinusV)
+		        		.addComponent(f_tiffYPosition)
+		        		.addComponent(l_sizerX)
+		        		.addComponent(f_sizerXPosition)
+		        		.addGap(30)
+		        		.addComponent(l_sizerY)
+		        		.addComponent(f_sizerYPosition)
 		        		//.addGap(75)
 		        		.addComponent(b_Image)
 		        		.addComponent(b_Sizer)
 		        		.addComponent(b_x1)
 		        		.addComponent(b_x10)
+		        		.addComponent(b_OK)
+		        		.addComponent(b_Reset)
 	            )
 		);
 		
-		mainPanel.setLayout(new BorderLayout());			// Rozk³ad dla okna g³ownego
+		mainPanel.setLayout(new BorderLayout());			// Rozkï¿½ad dla okna gï¿½ownego
 		
-		// Dodanie elementów do panelu warstwowego
+		// Dodanie elementï¿½w do panelu warstwowego
 		T_imageAndGrid.setLayout(new OverlayLayout(T_imageAndGrid));
 		T_imageAndGrid.add(tiffPanel,BorderLayout.CENTER);
 		
 		
-		// Dodanie elementów do panelu g³ównego
+		// Dodanie elementï¿½w do panelu gï¿½ï¿½wnego
 		mainPanel.add(controlPanel, BorderLayout.NORTH);	
 		mainPanel.add(T_imageAndGrid, BorderLayout.CENTER);
 		
-		controlPanel.setLayout(pozycjaLayout);				// Zastosowanie rozk³adu elementów panelu kontrolnego
+		controlPanel.setLayout(pozycjaLayout);				// Zastosowanie rozkï¿½adu elementï¿½w panelu kontrolnego
 	}
-	
+		
 	private void changeModeToSizer(){
 		this.mode=1;
 	}
@@ -217,81 +260,153 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	private void setSpeed(int speed){
 		this.speed=speed;
 	}
+	
+	//dzieli wybrany fragment obrazu na maÅ‚e obrazy - zapisuje je w tablicy 'array'
+	private BufferedImage[][] divideImage(BufferedImage image, int numbeorOfColumns, int numberOfRows){
+		BufferedImage[][] array = new BufferedImage[numbeorOfColumns][numberOfRows];
+		int deltaX = image.getWidth() / numbeorOfColumns;
+		int deltaY = image.getHeight() / numberOfRows;
+		
+		for(int row = 0; row < numberOfRows; row++){
+			for(int column = 0; column < numbeorOfColumns; column++){
+				array[column][row] = image.getSubimage(column * deltaX, row * deltaY, deltaX, deltaY);
+			}
+		}
+		//System.out.println(new Color(array[1][4].getRGB(10, 10)).getGreen());
+		return array;
+	}
+	
+	//liczy wartoÅ›Ä‡ Å›redniÄ… pikseli dla kaÅ¼dego obrazu
+	private double computeAvgValueOfPixels(BufferedImage image){
+		int sum = 0, tempValue = 0;
+		double avg = 0.0;
+		
+		for(int row = 0; row < image.getHeight(); row++){
+			for(int column = 0; column < image.getWidth(); column++){
+				tempValue = new Color(image.getRGB(column, row)).getGreen();
+				if(tempValue > 30){
+					sum += tempValue;
+				}
+			}
+		}
+		
+		avg = (double)sum / (image.getWidth() * image.getHeight());
+		
+		return avg;
+	}
+	
+	private void printAvgValues(BufferedImage[][] array, int numberOfColumns, int numberOfRows){
+		for(int row = 0; row < numberOfRows; row++){
+			for(int column = 0; column < numberOfColumns; column++){
+				System.out.print((float)computeAvgValueOfPixels(array[column][row]) + "\t");
+			}
+			System.out.println();
+		}
+	}
 
 	/**
-	 * Obs³uguje zdarzenia okna programu
+	 * Obsï¿½uguje zdarzenia okna programu
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == this.Menu.CloseButton){
+		if(e.getSource() == this.Menu.CloseButton){
 			this.dispose();
 		}
-		if (e.getSource() == this.b_x1){
+		else if(e.getSource() == this.b_x1){
 			this.setSpeed(1);
 			this.requestFocus();
 		}
-		if (e.getSource() == this.b_x10){
+		else if(e.getSource() == this.b_x10){
 			this.setSpeed(10);
 			this.requestFocus();
 		}
-		if (e.getSource() == this.b_Sizer){
+		else if(e.getSource() == this.b_Sizer){
 			this.changeModeToSizer();
 			this.requestFocus();
 		}
-		if (e.getSource() == this.b_Image){
+		else if(e.getSource() == this.b_Image){
 			this.changeModeToImage();
 			this.requestFocus();
 		}
-		if(e.getSource() == this.b_PlusH) {
-			HorizontalOffset++;
+		else if(e.getSource() == this.b_OK){
+			img = tiffPanel.getSubimage(
+						tiffPanel.getSizerXPosition(),
+						tiffPanel.getSizerYPosition(),
+						tiffPanel.getSizerWidth(),
+						tiffPanel.getSizerHeight());
+			
+			arrayOfImages = divideImage(img, numbCol, numbRow);
+			printAvgValues(arrayOfImages, numbCol, numbRow);
+			tiffPanel.drawSubimage(img);
+			this.requestFocus();
 		}
-		else if(e.getSource() == this.b_MinusH) {
-			HorizontalOffset--;
+		else if(e.getSource() == this.b_Reset){
+			tiffPanel.drawOriginalImage();
+			tiffPanel.resetTiffPosition();
+			tiffPanel.resetSizerPosition();
+			this.requestFocus();
 		}
-		else if(e.getSource() == this.b_PlusV) {
-			VerticalOffset++;
-		}
-		else if(e.getSource() == this.b_MinusV) {
-			VerticalOffset--;
-		}
-		else if(e.getSource() == this.f_verticalValue) {
-			HorizontalOffset = Integer.parseInt(f_verticalValue.getText());
-		}
-		else if(e.getSource() == this.f_horizontalValue) {
-			VerticalOffset = Integer.parseInt(f_horizontalValue.getText());
-		}
+//		if(e.getSource() == this.b_PlusH) {
+//			tiffYOffset++;
+//		}
+//		else if(e.getSource() == this.b_MinusH) {
+//			tiffYOffset--;
+//		}
+//		else if(e.getSource() == this.b_PlusV) {
+//			tiffXOffset++;
+//		}
+//		else if(e.getSource() == this.b_MinusV) {
+//			tiffXOffset--;
+//		}
+//		else if(e.getSource() == this.f_tiffYPosition) {
+//			tiffYOffset = Integer.parseInt(f_tiffYPosition.getText());
+//		}
+//		else if(e.getSource() == this.f_tiffXPosition) {
+//			tiffXOffset = Integer.parseInt(f_tiffXPosition.getText());
+//		}
 		
-		f_verticalValue.setText(Integer.toString(HorizontalOffset));
-		f_horizontalValue.setText(Integer.toString(VerticalOffset));
-		
-		
+		f_sizerXPosition.setText(Integer.toString(tiffPanel.getSizerXPosition()));
+		f_sizerYPosition.setText(Integer.toString(tiffPanel.getSizerYPosition()));
+		f_tiffYPosition.setText(Integer.toString(tiffPanel.getTiffYPosition()));
+		f_tiffXPosition.setText(Integer.toString(tiffPanel.getTiffXPosition()));
 	}
 	
 
 	
 
 	@Override
-	public void keyReleased(KeyEvent e) { // Kiedy puœci siê klawisz
-		if ((e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) && mode==0  && speed ==1){
+	public void keyReleased(KeyEvent e) { // Kiedy puï¿½ci siï¿½ klawisz
+//		if ((e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) && mode==0  && speed ==1){
+//			this.tiffPanel.moveTiff(e, this.speed);
+//		}
+//		else if ((e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) && mode==1 && speed ==1){
+//			this.tiffPanel.moveSizer(e,this.speed);
+//		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) { // Kiedy symbol znaku na klawiaturze zostanie wysï¿½any do systemu - nie dziaï¿½a dla strzaï¿½ek!
+		
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) { // Kiedy klawisz siï¿½ wciska lub jest wciskany
+		if ((e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) && mode==0  && speed == 1){
 			this.tiffPanel.moveTiff(e, this.speed);
 		}
-		else if ((e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) && mode==1 && speed ==1){
+		else if ((e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) && mode==1 && speed == 1){
 			this.tiffPanel.moveSizer(e,this.speed);
 		}
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) { // Kiedy symbol znaku na klawiaturze zostanie wys³any do systemu - nie dzia³a dla strza³ek!
-		
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) { // Kiedy klawisz siê wciska lub jest wciskany
-		if ((e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) && mode==0  && speed !=1){
+		else if ((e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) && mode==0  && speed !=1){
 			this.tiffPanel.moveTiff(e, this.speed);
 		}
 		else if ((e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) && mode==1 && speed !=1){
 			this.tiffPanel.moveSizer(e,this.speed);
 		}
+		
+		f_sizerXPosition.setText(Integer.toString(tiffPanel.getSizerXPosition()));
+		f_sizerYPosition.setText(Integer.toString(tiffPanel.getSizerYPosition()));
+		f_tiffYPosition.setText(Integer.toString(tiffPanel.getTiffYPosition()));
+		f_tiffXPosition.setText(Integer.toString(tiffPanel.getTiffXPosition()));
 	}
 	
 }
