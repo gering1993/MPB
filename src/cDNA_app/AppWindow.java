@@ -30,9 +30,10 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	private PasekMenu Menu;
 	private JPanel mainPanel, controlPanel;
 	private GroupLayout pozycjaLayout;
-	private JButton b_PlusV, b_MinusV, b_PlusH, b_MinusH, b_Image, b_Sizer ,b_x10, b_x1, b_OK, b_Reset;
+	private JButton b_PlusV, b_MinusV, b_PlusH, b_MinusH, b_Image, b_Sizer ,b_x10, b_x1, b_OK, b_Reset,
+					b_gridOn, b_gridOff;
 	private JTextField f_tiffXPosition, f_tiffYPosition, f_sizerXPosition, f_sizerYPosition;
-	private JLabel l_tiffX, l_tiffY, l_sizerX, l_sizerY;
+	private JLabel l_tiffX, l_tiffY, l_sizerX, l_sizerY, l_grid;
 	private int tiffXOffset, tiffYOffset, sizerXOffset, sizerYOffset;
 	private ImagePanel tiffPanel;
 	
@@ -122,6 +123,8 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		b_x10 = new JButton("x10");
 		b_OK = new JButton("OK");
 		b_Reset = new JButton("RESET");
+		b_gridOn = new JButton("Wł.");
+		b_gridOff = new JButton("Wył.");
 		
 		
 		// Pola na warto�ci przesuni�cia siatki
@@ -135,6 +138,7 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		l_tiffY = new JLabel("Y: ");
 		l_sizerX = new JLabel("Ramka   X: ");
 		l_sizerY = new JLabel("Y: ");
+		l_grid = new JLabel("Siatka");
 		
 		// Dodanie przycisk�w do panelu sterowania
 		controlPanel.add(l_tiffX);
@@ -159,6 +163,9 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		controlPanel.add(b_x10);
 		controlPanel.add(b_OK);
 		controlPanel.add(b_Reset);
+		controlPanel.add(l_grid);
+		controlPanel.add(b_gridOn);
+		controlPanel.add(b_gridOff);
 		
 		// Dodanie s�uchacza do przycisk�w panelu kontrolnego
 		//b_PlusH.addActionListener(this);
@@ -171,6 +178,8 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		b_x10.addActionListener(this);
 		b_OK.addActionListener(this);
 		b_Reset.addActionListener(this);
+		b_gridOn.addActionListener(this);
+		b_gridOff.addActionListener(this);
 		
 		// Dodanie s�uchacza p�l na warto�ci przesuni�cia siatki
 		//f_tiffYPosition.addActionListener(this);
@@ -203,7 +212,11 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
         		.addComponent(b_Sizer)
         		.addComponent(b_x1)
         		.addComponent(b_x10)
-        		.addGap(50)
+        		.addGap(40)
+        		.addComponent(l_grid)
+        		.addComponent(b_gridOn)
+        		.addComponent(b_gridOff)
+        		.addGap(40)
         		.addComponent(b_OK)
         		.addGap(10)
         		.addComponent(b_Reset)
@@ -230,6 +243,9 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		        		//.addGap(75)
 		        		.addComponent(b_Image)
 		        		.addComponent(b_Sizer)
+		        		.addComponent(l_grid)
+		        		.addComponent(b_gridOn)
+		        		.addComponent(b_gridOff)
 		        		.addComponent(b_x1)
 		        		.addComponent(b_x10)
 		        		.addComponent(b_OK)
@@ -259,6 +275,14 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	}
 	private void setSpeed(int speed){
 		this.speed=speed;
+	}
+	
+	private void gridOn(){
+		tiffPanel.drawGrid();
+	}
+	
+	private void gridOff(){
+		tiffPanel.drawFrame();
 	}
 	
 	//dzieli wybrany fragment obrazu na małe obrazy - zapisuje je w tablicy 'array'
@@ -344,6 +368,14 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 			tiffPanel.drawOriginalImage();
 			tiffPanel.resetTiffPosition();
 			tiffPanel.resetSizerPosition();
+			this.requestFocus();
+		}
+		else if(e.getSource() == this.b_gridOn){
+			gridOn();
+			this.requestFocus();
+		}
+		else if(e.getSource() == this.b_gridOff){
+			gridOff();
 			this.requestFocus();
 		}
 //		if(e.getSource() == this.b_PlusH) {
