@@ -110,7 +110,7 @@ public class ImagePanel extends JPanel {
 		else if(e.getKeyCode() == KeyEvent.VK_UP){
 			this.sizerYPosition-=speed;
 			if(sizerYPosition < tiffYPosition){
-				tiffXPosition = sizerXPosition;
+				tiffYPosition = sizerYPosition;
 			}
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_DOWN){
