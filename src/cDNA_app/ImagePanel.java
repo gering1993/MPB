@@ -33,7 +33,7 @@ public class ImagePanel extends JPanel {
 
   	private RenderedImage op;
   	
-  	BufferedImage sizer;
+  	BufferedImage sizer, frame, grid;
   	BufferedImage tiff, tiffOriginal, subimage;
   	
   	private int tiffXPosition;
@@ -46,7 +46,8 @@ public class ImagePanel extends JPanel {
     	tiffYPosition = 0;
     	sizerXPosition = 0;
     	sizerYPosition = 0;
-    	sizer = ImageIO.read(new File("lib_files/ramka2.png"));
+    	frame = ImageIO.read(new File("lib_files/ramka2.png"));
+    	grid = ImageIO.read(new File("lib_files/siatka.png"));
 		FileSeekableStream stream = new FileSeekableStream(filename);
 		TIFFDecodeParam decodeParam = new TIFFDecodeParam();
 		decodeParam.setDecodePaletteAsShorts(true);
@@ -55,6 +56,7 @@ public class ImagePanel extends JPanel {
 		RenderedOp image1 = JAI.create("tiff", params);
 		tiff = image1.getAsBufferedImage();
 		tiffOriginal = tiff;
+		sizer = frame;
 		//System.out.println(sizer.getHeight() + "  " + sizer.getWidth());
     }
     
@@ -119,6 +121,18 @@ public class ImagePanel extends JPanel {
 				tiffYPosition = sizerYPosition + sizer.getHeight() - tiff.getHeight();
 			}
 		}
+		repaint();
+	}
+	
+	//rysuj ramkę - włącz ramkę, wyłącz siatkę
+	public void drawFrame(){
+		sizer = frame;
+		repaint();
+	}
+	
+	//rysuj siatkę - włącz siatkę
+	public void drawGrid(){
+		sizer = grid;
 		repaint();
 	}
 	
