@@ -16,7 +16,7 @@ public class PasekMenu extends JMenuBar
 {
 	public JMenu MenuSegment1;
 	public JMenuItem CloseButton;
-	public JMenuItem Option1;
+	public JMenuItem Open;
 		
 	public PasekMenu()
 	
@@ -25,15 +25,15 @@ public class PasekMenu extends JMenuBar
 		MenuSegment1 = new JMenu("Aplikacja");
 		this.add(MenuSegment1);
 		
+		// Przycisk "Opcja 1"
+		Open = new JMenuItem("Otwórz");
+		MenuSegment1.add(Open);
+		
 		// Przycisk "Zamknij"
 		CloseButton = new JMenuItem("Zamknij");
 		KeyStroke altF4 = KeyStroke.getKeyStroke("alt F4");
 		CloseButton.setAccelerator(altF4);
 		MenuSegment1.add(CloseButton);
-
-		// Przycisk "Opcja 1"
-		Option1 = new JMenuItem("Opcja 1");
-		MenuSegment1.add(Option1);
 		
 	}
 }

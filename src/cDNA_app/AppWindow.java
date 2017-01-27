@@ -30,8 +30,9 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	private PasekMenu Menu;
 	private JPanel mainPanel, controlPanel;
 	private GroupLayout pozycjaLayout;
-	private JButton b_PlusV, b_MinusV, b_PlusH, b_MinusH, b_Image, b_Sizer ,b_x10, b_x1, b_OK, b_Reset,
-					b_gridOn, b_gridOff;
+	private JButton b_PlusV, b_MinusV, b_PlusH, b_MinusH, /*b_Image, b_Sizer ,b_x10, b_x1,*/ b_OK, b_Reset/*,
+					b_gridOn, b_gridOff*/;
+	private JToggleButton b_Image, b_Sizer ,b_x10, b_x1, b_gridOn, b_gridOff;
 	private JTextField f_tiffXPosition, f_tiffYPosition, f_sizerXPosition, f_sizerYPosition;
 	private JLabel l_tiffX, l_tiffY, l_sizerX, l_sizerY, l_grid;
 	private int tiffXOffset, tiffYOffset, sizerXOffset, sizerYOffset;
@@ -117,14 +118,15 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		//b_MinusV = new JButton("-");
 		//b_PlusH = new JButton("+");
 		//b_MinusH = new JButton("-");
-		b_Image = new JButton("Obraz");
-		b_Sizer = new JButton("Ramka");
-		b_x1 = new JButton("x1");
-		b_x10 = new JButton("x10");
+		//b_Image = new JButton("Obraz");
+		b_Image = new JToggleButton("Obraz");
+		b_Sizer = new JToggleButton("Ramka");
+		b_x1 = new JToggleButton("x1");
+		b_x10 = new JToggleButton("x10");
 		b_OK = new JButton("OK");
 		b_Reset = new JButton("RESET");
-		b_gridOn = new JButton("Wł.");
-		b_gridOff = new JButton("Wył.");
+		b_gridOn = new JToggleButton("Wł.");
+		b_gridOff = new JToggleButton("Wył.");
 		
 		
 		// Pola na warto�ci przesuni�cia siatki
@@ -309,6 +311,7 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 			for(int column = 0; column < image.getWidth(); column++){
 				tempValue = new Color(image.getRGB(column, row)).getGreen();
 				if(tempValue > 30){
+					image.setRGB(column, row, new Color(255, 0, 0).getRGB());
 					sum += tempValue;
 					pixelCounter++;
 				}
@@ -333,22 +336,31 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	 * Obs�uguje zdarzenia okna programu
 	 */
 	public void actionPerformed(ActionEvent e) {
+		//System.out.println(e.getActionCommand().toString());
 		if(e.getSource() == this.Menu.CloseButton){
 			this.dispose();
 		}
 		else if(e.getSource() == this.b_x1){
+			this.b_x1.setSelected(true);
+			this.b_x10.setSelected(false);
 			this.setSpeed(1);
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_x10){
+			this.b_x10.setSelected(true);
+			this.b_x1.setSelected(false);
 			this.setSpeed(10);
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_Sizer){
+			this.b_Sizer.setSelected(true);
+			this.b_Image.setSelected(false);
 			this.changeModeToSizer();
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_Image){
+			this.b_Image.setSelected(true);
+			this.b_Sizer.setSelected(false);
 			this.changeModeToImage();
 			this.requestFocus();
 		}
@@ -371,10 +383,14 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_gridOn){
+			this.b_gridOn.setSelected(true);
+			this.b_gridOff.setSelected(false);
 			gridOn();
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_gridOff){
+			this.b_gridOff.setSelected(true);
+			this.b_gridOn.setSelected(false);
 			gridOff();
 			this.requestFocus();
 		}
