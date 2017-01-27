@@ -37,8 +37,9 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 	private PasekMenu Menu;
 	private JPanel mainPanel, controlPanel;
 	private GroupLayout pozycjaLayout;
-	private JButton b_PlusV, b_MinusV, b_PlusH, b_MinusH, b_Image, b_Sizer ,b_x10, b_x1, b_OK, b_Reset,
-					b_gridOn, b_gridOff, b_setTreshld; 
+	private JButton /*b_PlusV, b_MinusV, b_PlusH, b_MinusH, b_Image, b_Sizer ,b_x10, b_x1,*/ b_OK, b_Reset,
+					/*b_gridOn, b_gridOff,*/ b_setTreshld;
+	private JToggleButton b_Image, b_Sizer, b_x10, b_x1, b_gridOn, b_gridOff;
 	private JTextField f_tiffXPosition, f_tiffYPosition, f_sizerXPosition, f_sizerYPosition;
 	private JLabel l_tiffX, l_tiffY, l_sizerX, l_sizerY, l_grid;
 	private int tiffXOffset, tiffYOffset, sizerXOffset, sizerYOffset;
@@ -75,7 +76,7 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 			e.printStackTrace();
 		}
 		addKeyListener(this);
-		this.mode=0;
+		this.mode=1;
 		this.speed=10;
 	}
 	
@@ -130,14 +131,14 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		//b_MinusV = new JButton("-");
 		//b_PlusH = new JButton("+");
 		//b_MinusH = new JButton("-");
-		b_Image = new JButton("Obraz");
-		b_Sizer = new JButton("Ramka");
-		b_x1 = new JButton("x1");
-		b_x10 = new JButton("x10");
+		b_Image = new JToggleButton("Obraz");
+		b_Sizer = new JToggleButton("Ramka");
+		b_x1 = new JToggleButton("x1");
+		b_x10 = new JToggleButton("x10");
 		b_OK = new JButton("OK");
 		b_Reset = new JButton("RESET");
-		b_gridOn = new JButton("Wł.");
-		b_gridOff = new JButton("Wył.");
+		b_gridOn = new JToggleButton("Wł.");
+		b_gridOff = new JToggleButton("Wył.");
 		b_setTreshld= new JButton("Wybór progu");
 		
 		//Domysle wylaczenie niektorych przyciskow
@@ -146,6 +147,10 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		b_gridOff.setEnabled(false);
 		b_gridOn.setEnabled(false);
 		b_setTreshld.setEnabled(false);
+		// Domyslny wybor niektorych 
+		b_Sizer.setSelected(true);
+		b_x10.setSelected(true);
+		b_gridOff.setSelected(true);
 		
 		
 		// Pola na wartosci przesuniecia siatki
@@ -219,30 +224,30 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
         		//.addComponent(b_PlusH)
         		//.addComponent(b_MinusH)
         		.addComponent(f_tiffXPosition)
-        		.addGap(20)
+        		.addGap(10)
         		.addComponent(l_tiffY)
         		//.addComponent(b_PlusV)
         		//.addComponent(b_MinusV)
         		.addComponent(f_tiffYPosition)
-        		.addGap(40)
+        		.addGap(30)
         		.addComponent(l_sizerX)
         		.addComponent(f_sizerXPosition)
-        		.addGap(20)
+        		.addGap(10)
         		.addComponent(l_sizerY)
         		.addComponent(f_sizerYPosition)
-        		.addGap(40)
+        		.addGap(30)
         		.addComponent(b_Image)
         		.addComponent(b_Sizer)
         		.addComponent(b_x1)
         		.addComponent(b_x10)
-        		.addGap(40)
+        		.addGap(30)
         		.addComponent(l_grid)
         		.addComponent(b_gridOn)
         		.addComponent(b_gridOff)
-        		.addGap(40)
+        		.addGap(30)
         		.addComponent(b_setTreshld)
         		.addComponent(b_OK)
-        		.addGap(10)
+        		//.addGap(10)
         		.addComponent(b_Reset)
         		
 		);
@@ -261,7 +266,7 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 		        		.addComponent(f_tiffYPosition)
 		        		.addComponent(l_sizerX)
 		        		.addComponent(f_sizerXPosition)
-		        		.addGap(30)
+		        		//.addGap(30)
 		        		.addComponent(l_sizerY)
 		        		.addComponent(f_sizerYPosition)
 		        		//.addGap(75)
@@ -389,18 +394,26 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 			this.dispose();
 		}
 		else if(e.getSource() == this.b_x1){
+			this.b_x1.setSelected(true);
+			this.b_x10.setSelected(false);
 			this.setSpeed(1);
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_x10){
+			this.b_x10.setSelected(true);
+			this.b_x1.setSelected(false);
 			this.setSpeed(10);
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_Sizer){
+			this.b_Sizer.setSelected(true);
+			this.b_Image.setSelected(false);
 			this.changeModeToSizer();
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_Image){
+			this.b_Image.setSelected(true);
+			this.b_Sizer.setSelected(false);
 			this.changeModeToImage();
 			this.requestFocus();
 		}
@@ -457,10 +470,14 @@ public class AppWindow extends JFrame implements KeyListener, ActionListener
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_gridOn){
+			this.b_gridOn.setSelected(true);
+			this.b_gridOff.setSelected(false);
 			gridOn();
 			this.requestFocus();
 		}
 		else if(e.getSource() == this.b_gridOff){
+			this.b_gridOff.setSelected(true);
+			this.b_gridOn.setSelected(false);
 			gridOff();
 			this.requestFocus();
 		}
