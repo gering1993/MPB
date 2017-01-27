@@ -1,6 +1,7 @@
 package cDNA_app;
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -34,21 +35,31 @@ public class ImagePanel extends JPanel {
   	private RenderedImage op;
   	
   	BufferedImage sizer, frame, grid;
-  	BufferedImage tiff, tiffOriginal, subimage;
+  	BufferedImage tiff, tiffOriginal, subimage, secondColorTiff;
+  	private BufferedImage rawFirstSubimage, rawSecondSubimage;
+  	
+  	private String firstTiffFilename, secondTiffFilename;
   	
   	private int tiffXPosition;
   	private int tiffYPosition;
   	private int sizerXPosition;
   	private int sizerYPosition;
+  	
+	private boolean isImageLoaded;
 
-    public ImagePanel(String filename) throws IOException {
+    public ImagePanel(String filename)  {
     	tiffXPosition = 0;
     	tiffYPosition = 0;
     	sizerXPosition = 0;
-    	sizerYPosition = 0;
+    	sizerYPosition = 0;    	
+    	isImageLoaded=false;
+
+    }
+    
+    public void loadTiff(String path) throws IOException{
     	frame = ImageIO.read(new File("lib_files/ramka2.png"));
     	grid = ImageIO.read(new File("lib_files/siatka.png"));
-		FileSeekableStream stream = new FileSeekableStream(filename);
+		FileSeekableStream stream = new FileSeekableStream(path);
 		TIFFDecodeParam decodeParam = new TIFFDecodeParam();
 		decodeParam.setDecodePaletteAsShorts(true);
 		ParameterBlock params = new ParameterBlock();
@@ -57,7 +68,25 @@ public class ImagePanel extends JPanel {
 		tiff = image1.getAsBufferedImage();
 		tiffOriginal = tiff;
 		sizer = frame;
-		//System.out.println(sizer.getHeight() + "  " + sizer.getWidth());
+		isImageLoaded=true;
+		
+		String secondTiffPath;
+		if (Pattern.matches(".+Cy5.+", path)){
+			 secondTiffPath = path.replaceAll("Cy5","Cy3");
+			 System.out.println(secondTiffPath);
+		}else{
+			 secondTiffPath = path.replaceAll("Cy3","Cy5");
+		}
+		
+		stream = new FileSeekableStream(secondTiffPath);
+		decodeParam = new TIFFDecodeParam();
+		decodeParam.setDecodePaletteAsShorts(true);
+		params = new ParameterBlock();
+		params.add(stream);
+		image1 = JAI.create("tiff", params);
+		secondColorTiff = image1.getAsBufferedImage();
+		
+		repaint();
     }
     
 	@Override
@@ -94,6 +123,22 @@ public class ImagePanel extends JPanel {
 			}
 		}
 		repaint();
+	}
+	
+	public void setRawFirstSubimage(BufferedImage rawFirstSubimageGenerated){
+		this.rawFirstSubimage=rawFirstSubimageGenerated;
+	}
+	
+	public void setRawSecondSubimage(BufferedImage rawSecondSubimageGenerated){
+		this.rawSecondSubimage=rawSecondSubimageGenerated;
+	}
+	
+	public BufferedImage getRawFirstSubimage(){
+		return this.rawFirstSubimage;
+	}
+	
+	public BufferedImage getRawSecondSubimage(){
+		return this.rawSecondSubimage;
 	}
 
 	public void moveSizer(KeyEvent e, int speed) {
@@ -145,6 +190,15 @@ public class ImagePanel extends JPanel {
 	//rysuje wybrany fragment oryginalnego obrazu
 	public void drawSubimage(BufferedImage image){
 		tiff = image;
+		//Color redColor = new Color (255,0,0);
+		//int rgbForRed = redColor.getRGB();
+		
+		//tiff = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+		//tiff.getGraphics().drawImage(image, 0, 0,null);
+		
+
+		
+		
 		resetSizerPosition();
 		resetTiffPosition();
 		repaint();
@@ -162,8 +216,12 @@ public class ImagePanel extends JPanel {
 		repaint();
 	}
 	
-	public BufferedImage getSubimage(int x, int y, int w, int h){
+	public BufferedImage getFirstTiffSubimage(int x, int y, int w, int h){
 		return tiff.getSubimage(x, y, w, h);
+	}
+	
+	public BufferedImage getSecondTiffSubimage(int x, int y, int w, int h){
+		return secondColorTiff.getSubimage(x, y, w, h);
 	}
 	
 	public int getTiffXPosition(){
@@ -212,6 +270,27 @@ public class ImagePanel extends JPanel {
 	
 	public void setSizerYPosition(int y){
 		sizerYPosition = y;
+	}
+	
+	public void setFirstTiffFilename(String filename){
+		this.firstTiffFilename = filename;
+		setSecondTiffFilename(filename);
+	}
+	
+	public void setSecondTiffFilename(String filename){
+		if (Pattern.matches(".+Cy5.+", filename)){
+			this.secondTiffFilename = filename.replaceAll("Cy5","Cy3");
+		}else{
+			this.secondTiffFilename = filename.replaceAll("Cy3","Cy5");
+		}
+	}
+	
+	public String getFirstTiffFilename(){
+		return this.firstTiffFilename;
+	}
+	
+	public String getSecondTiffFilename(){
+		return this.secondTiffFilename;
 	}
 }
 
